@@ -16,6 +16,7 @@ def convert_to_hours_minutes(minutes):
 
 def convert_release_date(release_date):
     rds = release_date.split()
+    new_release_date = "0000-00-00"
     if len(rds) == 3:
         month = rds[1][:-1]
         if month in list(calendar.month_abbr):
@@ -95,7 +96,7 @@ def create_properties(game, game_info):
             "title": [
                 {
                     "type": "text",
-                    "text": {"content": game_info["name"]},
+                    "text": {"content": game["name"]},
                 }
             ],
         },

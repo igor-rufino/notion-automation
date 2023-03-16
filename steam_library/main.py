@@ -75,11 +75,10 @@ def run():
 
     created_pages = 0
     for game in games:
-        game_info = steam.get_game_details(game)
+        if game["name"] not in page_list:
+            game_info = steam.get_game_details(game)
 
-        if game_info:
-            # if game_info["name"] not in page_list:
-            if game_info["name"] == "No Man's Sky":
+            if game_info:
                 response = create_page(game, game_info)
                 if response.status_code == 200:
                     created_pages += 1
