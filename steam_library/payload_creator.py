@@ -16,11 +16,18 @@ def convert_to_hours_minutes(minutes):
 
 def convert_release_date(release_date):
     rds = release_date.split()
-    if rds[1][:-1] in list(calendar.month_abbr):
-        s_mn = list(calendar.month_abbr).index(rds[1][:-1])
-        new_release_date = f"{int(rds[2]):04d}-{int(s_mn):02d}-{int(rds[0]):02d}"
+    if len(rds) == 3:
+        month = rds[1][:-1]
+        if month in list(calendar.month_abbr):
+            s_mn = list(calendar.month_abbr).index(month)
+            new_release_date = f"{int(rds[2]):04d}-{int(s_mn):02d}-{int(rds[0]):02d}"
+
     else:
-        new_release_date = "0000-00-00"  # will cancel creation
+        month = rds[0]
+        if month in list(calendar.month_abbr):
+            s_mn = list(calendar.month_abbr).index(month)
+            new_release_date = f"{int(rds[1]):04d}-{int(s_mn):02d}-01"
+
     return new_release_date
 
 

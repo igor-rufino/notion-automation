@@ -17,17 +17,27 @@ URLS = {"NOTION": "https://api.notion.com/v1"}
 
 def get_database_items():
     url = f"{URLS['NOTION']}/databases/{NOTION_STEAMDB_ID}/query"
-    payload = {"page_size": 1000}
+
     headers = {
         "Authorization": "Bearer " + NOTION_KEY,
         "accept": "application/json",
         "Notion-Version": "2022-06-28",
         "content-type": "application/json",
     }
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json={"page_size": 100}, headers=headers)
+
+    data = response.json()
+    items = data["results"]
+    while data["has_more"] == "true" or data["has_more"]:
+        data = requests.post(
+            url,
+            json={"page_size": 100, "start_cursor": data["next_cursor"]},
+            headers=headers,
+        ).json()
+        items.extend(data["results"])
 
     if response.status_code == 200:
-        return response
+        return items
     else:
         print(f"Error getting database items: {response.status_code}")
         return
@@ -51,20 +61,28 @@ def create_page(game, game_info):
         headers=headers,
     )
     if response.status_code != 200:
-        print(f"Error creating page: {response.status_code}")
+        print(f"Error creating {game_info['name']} page: {response.status_code}")
     return response
 
 
 def run():
+    items = get_database_items()
+    page_list = []
+    for item in items:
+        page_list.append(item["properties"]["Name"]["title"][0]["text"]["content"])
+
     games = steam.get_library_games(steam_key=STEAM_KEY, steam_id=STEAM_ID)
 
     created_pages = 0
     for game in games:
         game_info = steam.get_game_details(game)
+
         if game_info:
-            response = create_page(game, game_info)
-            if response.status_code == 200:
-                created_pages += 1
+            # if game_info["name"] not in page_list:
+            if game_info["name"] == "No Man's Sky":
+                response = create_page(game, game_info)
+                if response.status_code == 200:
+                    created_pages += 1
     print(f"Successfully created {created_pages} new pages")
 
 
